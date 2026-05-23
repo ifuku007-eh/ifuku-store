@@ -28,7 +28,11 @@ export default function ProtectedLayout({
   }, [router]);
 
   if (loading) {
-    return null; // atau loading spinner
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#020617] text-white">
+        <div className="animate-pulse text-lg font-semibold">Loading...</div>
+      </div>
+    );
   }
 
   return <>{children}</>;

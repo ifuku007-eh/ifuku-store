@@ -32,7 +32,7 @@ export default function LoginPage() {
       alert(error.message);
     } else {
       router.refresh();
-      router.replace("/shop");
+      window.location.href = "/shop";
     }
   };
 
