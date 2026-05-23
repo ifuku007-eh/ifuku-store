@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { usePathname } from "next/navigation";
 
 export default function ProtectedLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -15,7 +17,7 @@ export default function ProtectedLayout({
       const { data } = await supabase.auth.getSession();
 
       if (!data.session?.user) {
-        window.location.href = "/login";
+        window.location.replace(`/login?next=${pathname}`);
         return;
       }
 
@@ -23,7 +25,7 @@ export default function ProtectedLayout({
     };
 
     checkUser();
-  }, []);
+  }, [pathname]);
 
   if (loading) {
     return (

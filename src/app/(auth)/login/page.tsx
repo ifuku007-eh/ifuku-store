@@ -37,7 +37,7 @@ export default function LoginPage() {
         return;
       }
 
-      window.location.assign("/shop");
+      window.location.replace("/shop");
     } catch (err) {
       console.error(err);
       alert("Terjadi error saat login");
