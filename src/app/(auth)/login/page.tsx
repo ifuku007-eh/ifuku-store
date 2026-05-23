@@ -12,37 +12,22 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email || !password) {
-      alert("Email dan password wajib diisi");
+    setLoading(true);
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    console.log("LOGIN RESULT:", { data, error });
+
+    if (error) {
+      alert(error.message);
+      setLoading(false);
       return;
     }
 
-    try {
-      setLoading(true);
-
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        alert(error.message);
-        setLoading(false);
-        return;
-      }
-
-      if (!data.session) {
-        alert("Login gagal, session tidak ditemukan");
-        setLoading(false);
-        return;
-      }
-
-      window.location.replace("/shop");
-    } catch (err) {
-      console.error(err);
-      alert("Terjadi error saat login");
-      setLoading(false);
-    }
+    window.location.href = "/shop";
   };
 
   return (
@@ -57,32 +42,30 @@ export default function LoginPage() {
 
         <div className="space-y-4">
           <input
-            id="email"
             name="email"
             type="email"
             placeholder="Email"
             value={email}
             disabled={loading}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-3 rounded bg-[#334155] text-white outline-none focus:ring-2 ring-blue-500 disabled:opacity-70"
+            className="w-full p-3 rounded bg-[#334155] text-white outline-none"
           />
 
           <input
-            id="password"
             name="password"
             type="password"
             placeholder="Password"
             value={password}
             disabled={loading}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-3 rounded bg-[#334155] text-white outline-none focus:ring-2 ring-blue-500 disabled:opacity-70"
+            className="w-full p-3 rounded bg-[#334155] text-white outline-none"
           />
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full mt-5 bg-blue-600 py-3 rounded-lg font-semibold text-white hover:bg-blue-700 transition disabled:opacity-60"
+          className="w-full mt-5 bg-blue-600 py-3 rounded-lg font-semibold text-white"
         >
           {loading ? "Loading..." : "Login"}
         </button>
