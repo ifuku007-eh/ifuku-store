@@ -1,38 +1,35 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { useUserStore } from "@/store/useUser";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+  const router = useRouter();
   const setUser = useUserStore((s) => s.setUser);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data } = await supabase.auth.getSession();
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-      if (data.session?.user) {
-        window.location.href = "/shop";
-      }
-    };
-
-    checkUser();
-  }, []);
-
-  const handleLogin = async () => {
     if (!email || !password) {
       alert("Email dan password wajib diisi");
       return;
     }
 
+    setLoading(true);
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
+
+    setLoading(false);
 
     if (error) {
       alert(error.message);
@@ -40,12 +37,15 @@ export default function LoginPage() {
     }
 
     setUser(data.user);
-    window.location.href = "/shop";
+    router.replace("/shop");
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#020617] to-[#0f172a] px-4">
-      <div className="bg-[#1e293b] p-8 rounded-2xl w-full max-w-[380px] shadow-xl">
+      <form
+        onSubmit={handleLogin}
+        className="bg-[#1e293b] p-8 rounded-2xl w-full max-w-[380px] shadow-xl"
+      >
         <h1 className="text-2xl font-bold text-white mb-6 text-center">
           Login
         </h1>
@@ -73,10 +73,11 @@ export default function LoginPage() {
         </div>
 
         <button
-          onClick={handleLogin}
-          className="w-full mt-5 bg-blue-600 py-3 rounded-lg font-semibold text-white hover:bg-blue-700 transition"
+          type="submit"
+          disabled={loading}
+          className="w-full mt-5 bg-blue-600 py-3 rounded-lg font-semibold text-white hover:bg-blue-700 transition disabled:opacity-60"
         >
-          Login
+          {loading ? "Loading..." : "Login"}
         </button>
 
         <p className="text-center text-sm text-gray-400 mt-4">
@@ -85,7 +86,7 @@ export default function LoginPage() {
             Daftar sekarang
           </Link>
         </p>
-      </div>
+      </form>
     </div>
   );
 }
