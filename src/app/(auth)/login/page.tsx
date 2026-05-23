@@ -3,13 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { useUserStore } from "@/store/useUser";
-import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const router = useRouter();
-  const setUser = useUserStore((s) => s.setUser);
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -22,26 +17,36 @@ export default function LoginPage() {
       return;
     }
 
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    setLoading(false);
+      if (error) {
+        alert(error.message);
+        setLoading(false);
+        return;
+      }
 
-    if (error) {
-      alert(error.message);
-      return;
+      if (!data.session) {
+        alert("Login gagal, session tidak ditemukan");
+        setLoading(false);
+        return;
+      }
+
+      window.location.assign("/shop");
+    } catch (err) {
+      console.error(err);
+      alert("Terjadi error saat login");
+      setLoading(false);
     }
-
-    setUser(data.user);
-    router.replace("/shop");
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#020617] to-[#0f172a] px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#020617] px-4">
       <form
         onSubmit={handleLogin}
         className="bg-[#1e293b] p-8 rounded-2xl w-full max-w-[380px] shadow-xl"
@@ -57,8 +62,9 @@ export default function LoginPage() {
             type="email"
             placeholder="Email"
             value={email}
-            className="w-full p-3 rounded bg-[#334155] text-white outline-none focus:ring-2 ring-blue-500"
+            disabled={loading}
             onChange={(e) => setEmail(e.target.value)}
+            className="w-full p-3 rounded bg-[#334155] text-white outline-none focus:ring-2 ring-blue-500 disabled:opacity-70"
           />
 
           <input
@@ -67,8 +73,9 @@ export default function LoginPage() {
             type="password"
             placeholder="Password"
             value={password}
-            className="w-full p-3 rounded bg-[#334155] text-white outline-none focus:ring-2 ring-blue-500"
+            disabled={loading}
             onChange={(e) => setPassword(e.target.value)}
+            className="w-full p-3 rounded bg-[#334155] text-white outline-none focus:ring-2 ring-blue-500 disabled:opacity-70"
           />
         </div>
 
