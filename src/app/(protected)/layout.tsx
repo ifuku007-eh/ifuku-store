@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 export default function ProtectedLayout({
@@ -9,28 +8,27 @@ export default function ProtectedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const router = useRouter();
-
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const checkUser = async () => {
-      const { data } = await supabase.auth.getUser();
+      const { data } = await supabase.auth.getSession();
 
-      if (!data.user) {
-        router.replace("/login");
-      } else {
-        setLoading(false);
+      if (!data.session?.user) {
+        window.location.href = "/login";
+        return;
       }
+
+      setLoading(false);
     };
 
     checkUser();
-  }, [router]);
+  }, []);
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#020617] text-white">
-        <div className="animate-pulse text-lg font-semibold">Loading...</div>
+        Loading...
       </div>
     );
   }
